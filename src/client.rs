@@ -58,36 +58,28 @@ fn api_call(path: &str) -> Result<String, ClientError> {
     Ok(body)
 }
 
-fn get_license(id: &str) -> Result<License, ClientError> {
-    let path = format!("license/{}", id);
-    match api_call(&path) {
+macro_rules! license {
+    ($path:expr, $license:ty) => (
+    match api_call($path) {
         Ok(data) => {
-            let l: License = try!(serde_json::from_str(&data));
+            let l: $license = try!(serde_json::from_str(&data));
             Ok(l)
         }
         Err(e) => Err(e),
     }
-}
-
-fn get_licenses(path: &str) -> Result<Vec<License>, ClientError> {
-    match api_call(&path) {
-        Ok(data) => {
-            let l: Vec<License> = try!(serde_json::from_str(&data));
-            Ok(l)
-        }
-        Err(e) => Err(e),
-    }
+    )
 }
 
 pub fn get(id: &str) -> Result<License, ClientError> {
-    get_license(id)
+    let path = format!("license/{}", id);
+    license!(&path, License)
 }
 
 pub fn all() -> Result<Vec<License>, ClientError> {
-    get_licenses("licenses/")
+    license!("licenses/", Vec<License>)
 }
 
 pub fn tagged(keyword: &str) -> Result<Vec<License>, ClientError> {
     let path = format!("licenses/{}", keyword);
-    get_licenses(&path)
+    license!(&path, Vec<License>)
 }
