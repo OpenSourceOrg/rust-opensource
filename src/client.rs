@@ -8,40 +8,40 @@ use super::license::License;
 
 const BASE_URL: &'static str = "https://api.opensource.org";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct ClientError {
     detail: ErrorDetail,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 enum ErrorDetail {
-    ParseError,
-    ConnectionError,
-    ReadError,
-    JsonError,
+    ParseError(url::ParseError),
+    ConnectionError(hyper::Error),
+    ReadError(io::Error),
+    JsonError(serde_json::Error),
 }
 
 impl From<url::ParseError> for ClientError {
-    fn from(_: url::ParseError) -> ClientError {
-        ClientError { detail: ErrorDetail::ParseError }
+    fn from(err: url::ParseError) -> ClientError {
+        ClientError { detail: ErrorDetail::ParseError(err) }
     }
 }
 
 impl From<hyper::Error> for ClientError {
-    fn from(_: hyper::Error) -> ClientError {
-        ClientError { detail: ErrorDetail::ConnectionError }
+    fn from(err: hyper::Error) -> ClientError {
+        ClientError { detail: ErrorDetail::ConnectionError(err) }
     }
 }
 
 impl From<io::Error> for ClientError {
-    fn from(_: io::Error) -> ClientError {
-        ClientError { detail: ErrorDetail::ReadError }
+    fn from(err: io::Error) -> ClientError {
+        ClientError { detail: ErrorDetail::ReadError(err) }
     }
 }
 
 impl From<serde_json::Error> for ClientError {
-    fn from(_: serde_json::Error) -> ClientError {
-        ClientError { detail: ErrorDetail::JsonError }
+    fn from(err: serde_json::Error) -> ClientError {
+        ClientError { detail: ErrorDetail::JsonError(err) }
     }
 }
 
