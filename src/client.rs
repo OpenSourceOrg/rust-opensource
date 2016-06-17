@@ -19,6 +19,17 @@ enum ErrorDetail {
     ConnectionError(hyper::Error),
     ReadError(io::Error),
     JsonError(serde_json::Error),
+    APIError { errors: Vec<Message> }
+}
+
+#[derive(Debug, Deserialize)]
+struct APIError {
+    pub errors: Vec<Message>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Message {
+    pub message: String
 }
 
 impl From<url::ParseError> for ClientError {
@@ -55,7 +66,12 @@ fn api_call(path: &str) -> Result<String, ClientError> {
     let mut response = try!(client.get(url).send());
     let mut body = String::new();
     try!(response.read_to_string(&mut body));
-    Ok(body)
+    if response.status == hyper::Ok {
+        Ok(body)
+    } else {
+        let err: APIError = try!(serde_json::from_str(&body));
+        Err(ClientError { detail: ErrorDetail::APIError{ errors: err.errors } })
+    }
 }
 
 macro_rules! license {
