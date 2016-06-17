@@ -2,6 +2,9 @@
 name = "opensource"
 version = "0.1.0"
 authors = ["Daniele Tricoli <eriol@mornie.org>"]
+license = "BSD-3-Clause"
+description = "API Wrapper for the Open Source License API."
+keywords = ["api", "opensource"]
 
 [dependencies]
 hyper = "0.9.*"
