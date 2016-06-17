@@ -15,6 +15,7 @@ use super::license::License;
 
 const BASE_URL: &'static str = "https://api.opensource.org";
 
+/// A client error. You can use the Error trait to interact with it.
 #[derive(Debug)]
 pub struct ClientError {
     detail: ErrorDetail,
@@ -143,15 +144,18 @@ macro_rules! license {
     )
 }
 
+/// Return a License for the given `id`.
 pub fn get(id: &str) -> Result<License, ClientError> {
     let path = format!("license/{}", id);
     license!(&path, License)
 }
 
+/// Return a Vec of all known Licenses.
 pub fn all() -> Result<Vec<License>, ClientError> {
     license!("licenses/", Vec<License>)
 }
 
+/// Return a Vec of all Licenses contain `keyword`.
 pub fn tagged(keyword: &str) -> Result<Vec<License>, ClientError> {
     let path = format!("licenses/{}", keyword);
     license!(&path, Vec<License>)
