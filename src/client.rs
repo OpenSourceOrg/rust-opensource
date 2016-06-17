@@ -3,6 +3,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+use std::error;
+use std::fmt;
 use std::io::{self, Read};
 
 use hyper::{self, Client};
@@ -24,11 +26,11 @@ enum ErrorDetail {
     ConnectionError(hyper::Error),
     ReadError(io::Error),
     JsonError(serde_json::Error),
-    APIError { errors: Vec<Message> }
+    APIError(RequestError),
 }
 
 #[derive(Debug, Deserialize)]
-struct APIError {
+struct RequestError {
     pub errors: Vec<Message>,
 }
 
@@ -61,6 +63,56 @@ impl From<serde_json::Error> for ClientError {
     }
 }
 
+impl fmt::Display for ClientError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.detail {
+            ErrorDetail::ParseError(ref err) => err.fmt(f),
+            ErrorDetail::ConnectionError(ref err) => err.fmt(f),
+            ErrorDetail::ReadError(ref err) => err.fmt(f),
+            ErrorDetail::JsonError(ref err) => err.fmt(f),
+            ErrorDetail::APIError(ref err) => err.fmt(f),
+        }
+    }
+}
+
+impl error::Error for ClientError {
+    fn description(&self) -> &str {
+        match self.detail {
+            ErrorDetail::ParseError(ref err) => err.description(),
+            ErrorDetail::ConnectionError(ref err) => err.description(),
+            ErrorDetail::ReadError(ref err) => err.description(),
+            ErrorDetail::JsonError(ref err) => err.description(),
+            ErrorDetail::APIError(ref err) => err.description(),
+        }
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        match self.detail {
+            ErrorDetail::ParseError(ref err) => Some(err as &error::Error),
+            ErrorDetail::ConnectionError(ref err) => Some(err as &error::Error),
+            ErrorDetail::ReadError(ref err) => Some(err as &error::Error),
+            ErrorDetail::JsonError(ref err) => Some(err as &error::Error),
+            ErrorDetail::APIError(ref err) => Some(err as &error::Error),
+        }
+    }
+}
+
+impl fmt::Display for RequestError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.errors)
+    }
+}
+
+impl error::Error for RequestError {
+    fn description(&self) -> &str {
+        "An API error occurred."
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        Some(self as &error::Error)
+    }
+}
+
 fn url_join(input: &str) -> Result<Url, url::ParseError> {
     try!(Url::parse(BASE_URL)).join(input)
 }
@@ -74,8 +126,8 @@ fn api_call(path: &str) -> Result<String, ClientError> {
     if response.status == hyper::Ok {
         Ok(body)
     } else {
-        let err: APIError = try!(serde_json::from_str(&body));
-        Err(ClientError { detail: ErrorDetail::APIError{ errors: err.errors } })
+        let err: RequestError = try!(serde_json::from_str(&body));
+        Err(ClientError { detail: ErrorDetail::APIError(err) })
     }
 }
 
