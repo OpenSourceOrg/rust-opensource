@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["all","Return a Vec of all known Licenses."],["get","Return a License for the given `id`."],["tagged","Return a Vec of all Licenses contain `keyword`."]],"struct":[["ClientError","A client error. You can use the Error trait to interact with it."]]});
