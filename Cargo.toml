@@ -5,6 +5,7 @@ authors = ["Daniele Tricoli <eriol@mornie.org>"]
 license = "BSD-3-Clause"
 description = "API Wrapper for the Open Source License API."
 keywords = ["api", "opensource"]
+repository = "https://github.com/OpenSourceOrg/rust-opensource"
 
 [dependencies]
 hyper = "0.9.*"
