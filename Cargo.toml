@@ -1,6 +1,6 @@
 [package]
 name = "opensource"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Daniele Tricoli <eriol@mornie.org>"]
 license = "BSD-3-Clause"
 description = "API Wrapper for the Open Source License API."
