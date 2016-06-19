@@ -12,6 +12,9 @@ The crate is called `opensource` and you can depend on it via cargo:
 opensource = "0.1.0"
 ```
 
+Documentation can be found at
+[OpenSourceOrg.github.io/rust-opensource](https://OpenSourceOrg.github.io/rust-opensource).
+
 **NOTE:** It's currently using `serde` so you must use `nigtly` for now.
 
 # Examples #
