@@ -7,7 +7,7 @@ use std::error;
 use std::fmt;
 use std::io::{self, Read};
 
-use hyper::{self, Client};
+use reqwest;
 use serde_json;
 use url::{self, Url};
 
@@ -24,7 +24,7 @@ pub struct ClientError {
 #[derive(Debug)]
 enum ErrorDetail {
     ParseError(url::ParseError),
-    ConnectionError(hyper::Error),
+    ConnectionError(reqwest::Error),
     ReadError(io::Error),
     JsonError(serde_json::Error),
     APIError(RequestError),
@@ -46,8 +46,8 @@ impl From<url::ParseError> for ClientError {
     }
 }
 
-impl From<hyper::Error> for ClientError {
-    fn from(err: hyper::Error) -> ClientError {
+impl From<reqwest::Error> for ClientError {
+    fn from(err: reqwest::Error) -> ClientError {
         ClientError { detail: ErrorDetail::ConnectionError(err) }
     }
 }
@@ -120,11 +120,10 @@ fn url_join(input: &str) -> Result<Url, url::ParseError> {
 
 fn api_call(path: &str) -> Result<String, ClientError> {
     let url = try!(url_join(path));
-    let client = Client::new();
-    let mut response = try!(client.get(url).send());
+    let mut response = try!(reqwest::get(url));
     let mut body = String::new();
     try!(response.read_to_string(&mut body));
-    if response.status == hyper::Ok {
+    if response.status().is_success() {
         Ok(body)
     } else {
         let err: RequestError = try!(serde_json::from_str(&body));
