@@ -6,7 +6,7 @@ license = "BSD-3-Clause"
 description = "API Wrapper for the Open Source License API."
 keywords = ["api", "opensource"]
 repository = "https://github.com/OpenSourceOrg/rust-opensource"
-documentation = "https://OpenSourceOrg.github.io/rust-opensource"
+documentation = "https://docs.rs/crate/opensource"
 readme = "README.md"
 
 [dependencies]
